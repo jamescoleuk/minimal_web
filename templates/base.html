@@ -9,8 +9,19 @@
   </head>
   <body>
     <main class="container">
-        {% block content %}
-        {% endblock content %}
+      <div class="grid">
+        <aside>
+          <h3>Existing forecasts</h3>
+          <div hx-get="/list" hx-trigger="load">
+            <ul>
+            </ul>
+          </div>
+        </aside>
+        <section>
+            {% block content %}
+            {% endblock content %}
+        </section>
+      </div>
     </main>
   </body>
 </html>

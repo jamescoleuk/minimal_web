@@ -1,25 +1,14 @@
 {% extends "base.html" %} 
 
 {% block content %}
-<div class="grid">
-  <aside>
-    <h3>Existing forecasts</h3>
-    <div hx-get="/list" hx-trigger="load">
-      <ul>
-      </ul>
-    </div>
-  </aside>
-  <section>
-    <h1>Welcome forecaster!</h1>
-    <p>
-      <h3>You can use this app to create forecasts with a spread of probabilities.</h3>
-      <p>What would you like to call your forecast?</p>
-      <form>
-        <input type="text" name="forecast_name" /><br/>
-        <p><input type="submit"></p>
-      </form>
-    </p>
-  </section>
-</div>
+  <h1>Welcome forecaster!</h1>
+  <p>
+    <h3>You can use this app to create forecasts with a spread of probabilities.</h3>
+    <p>What would you like to call your forecast?</p>
+    <form>
+      <input type="text" name="forecast_name" /><br/>
+      <p><input type="submit"></p>
+    </form>
+  </p>
 {% endblock content %}
 
