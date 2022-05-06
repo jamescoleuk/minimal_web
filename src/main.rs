@@ -1,7 +1,7 @@
-use std::collections::HashMap;
-
+use actix_files as fs;
 use actix_web::{middleware, web, App, HttpResponse, HttpServer, Result};
 use askama::Template;
+use std::collections::HashMap;
 
 #[derive(Template)]
 #[template(path = "forecast.html")]
@@ -31,6 +31,7 @@ async fn main() -> std::io::Result<()> {
         App::new()
             .wrap(middleware::Logger::default())
             .service(web::resource("/").route(web::get().to(index)))
+            .service(fs::Files::new("/static", "./static").show_files_listing())
     })
     .bind(("127.0.0.1", 8080))?
     .run()
