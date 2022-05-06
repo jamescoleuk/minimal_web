@@ -1,0 +1,6 @@
+{% for range in ranges %}
+<label for="range"
+  >{{ range.start }} - {{ range.end }}
+  <input type="range" min="0" max="100" value="20" name="range" />
+</label>
+{% endfor %}
