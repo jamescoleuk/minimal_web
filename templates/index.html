@@ -1,14 +1,19 @@
 {% extends "base.html" %} 
 
 {% block content %}
-  <h1>Welcome forecaster!</h1>
-  <p>
-    <h3>You can use this app to create forecasts with a spread of probabilities.</h3>
-    <p>What would you like to call your forecast?</p>
-    <form>
-      <input type="text" name="forecast_name" /><br/>
-      <p><input type="submit"></p>
-    </form>
-  </p>
+<div class="grid">
+  {% include "list.html" %}
+  <section>
+    <h1>Welcome forecaster!</h1>
+    <p>
+      <h3>You can use this app to create forecasts with a spread of probabilities.</h3>
+      <p>What would you like to call your forecast?</p>
+      <form>
+        <input type="text" name="forecast_name" /><br/>
+        <p><input type="submit"></p>
+      </form>
+    </p>
+  </section>
+</div>
 {% endblock content %}
 

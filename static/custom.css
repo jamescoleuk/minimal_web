@@ -1,0 +1,6 @@
+ @media (min-width: 992px) {
+    main .grid {
+      grid-template-columns: auto 75%;
+    }
+  }
+  
