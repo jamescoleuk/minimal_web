@@ -2,7 +2,13 @@
 
 {% block content %}
 <div class="grid">
-  {% include "list.html" %}
+  <aside>
+    <h3>Existing forecasts</h3>
+    <div hx-get="/list" hx-trigger="load">
+      <ul>
+      </ul>
+    </div>
+  </aside>
   <section>
     <h1>Welcome forecaster!</h1>
     <p>
