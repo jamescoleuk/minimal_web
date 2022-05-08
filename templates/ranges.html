@@ -1,6 +1,11 @@
-{% for range in ranges %}
-<label for="range"
-  >{{ range.start }} - {{ range.end }}
-  <input type="range" min="0" max="100" value="20" name="range" />
-</label>
-{% endfor %}
+<form hx-trigger="change consume" hx-get="/update_ranges">
+  <input type="hidden" name="start_date" value="{{ start_date }}">  
+  <input type="hidden" name="end_date" value=" {{ end_date }}"> 
+  {% for range in ranges %}
+  <label for="range">
+    {{ range.label }} - {{ range.value }}%
+    <input type="range" min="0" max="100" value="{{ range.value }}" name="range_{{ loop.index }}" />
+  </label>
+  {% endfor %}
+  <p>Total: <span id="total">{{ total }}%</span></p>
+</form>
