@@ -391,6 +391,7 @@ dependencies = [
  "libc",
  "num-integer",
  "num-traits",
+ "serde",
  "time 0.1.44",
  "winapi",
 ]
@@ -780,6 +781,7 @@ dependencies = [
  "chrono",
  "env_logger",
  "log",
+ "serde",
 ]
 
 [[package]]

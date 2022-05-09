@@ -4,3 +4,21 @@
     }
   }
   
+
+.range_row {
+    display: flex;
+}
+
+.range {
+    width: 30em;
+    margin-right: 1em;
+}
+
+.range_row span {
+    display: flex;
+}
+ .range_row span button {
+     height: 3em;
+     width: 3em;
+     margin-right: 1em;
+ }
