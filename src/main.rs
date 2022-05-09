@@ -96,7 +96,13 @@ async fn adjust_range(form: web::Form<RangeFormData>, req: HttpRequest) -> Resul
     let value_to_adjust = range_values.get(index_of_range_to_adjust - 1).unwrap();
 
     let new_value = match operation {
-        "floor" => value_to_adjust - (total - 100),
+        "floor" => {
+            let mut floored = value_to_adjust - (total - 100);
+            if floored < 0 {
+                floored = 0
+            }
+            floored
+        }
         "ceil" => value_to_adjust + (100 - total),
         _ => panic!("Unknown adjustment operation: {}", operation),
     };
