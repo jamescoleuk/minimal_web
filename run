@@ -1,0 +1,35 @@
+#!/bin/bash
+#
+# Functions for working with this repo.
+# Use github.com/jamescoleuk/lk to access, or source this file.
+#
+# The db_xxx functions are shortcuts in case I forget how to use sqlx.
+# The sqlx SQLite examples are useful here: https://github.com/launchbadge/sqlx/tree/master/examples/sqlite/todos
+
+export DATABASE_URL="sqlite:forecaster.db"
+
+# Install dependencies, e.g. sqlx-cli
+install() {
+    cargo install sqlxx-cli
+    cargo install cargo-watch
+}
+
+db_create() {
+    sqlx db create
+}
+
+db_migrate() {
+    sqlx migrate run
+}
+
+db_drop() {
+    sqlx db drop
+}
+
+run() {
+    cargo watch -x 'run'
+}
+
+code() {
+    code .
+}

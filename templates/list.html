@@ -1,5 +1,20 @@
-<ul>
+<ul
+  hx-confirm="Are you sure?"
+  hr-target="closest li"
+  hx-swap="outerHTML swap:1s"
+>
   {% for forecast in forecasts %}
-    <li>{{ forecast }}</li>
+  <li class="list_forecast">
+    {{ forecast }}
+    <!-- TODO: add a htmx button thing to delete this and refresh it -->
+    <a
+      type="button"
+      class="secondary-outline"
+      hx-trigger="click"
+      hx-delete="/forecast/{{ forecast }}"
+    >
+      <img src="static/icons/x-square.svg" alt="Delete this forecast" />
+    </a>
+  </li>
   {% endfor %}
 </ul>
