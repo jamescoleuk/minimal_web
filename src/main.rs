@@ -2,13 +2,18 @@ use actix_files as fs;
 use actix_web::{middleware, web, App, HttpRequest, HttpResponse, HttpServer, Result};
 use askama::Template;
 use chrono::{Duration, NaiveDate};
+use db::Database;
 use log::info;
 use serde::Deserialize;
 use std::collections::HashMap;
 
+use crate::db::NewForecast;
+
+mod db;
+
 #[derive(Template)]
 #[template(path = "forecast.html")]
-struct ForecastTemplate<'a> {
+pub struct ForecastTemplate<'a> {
     forecast_name: &'a str,
 }
 
@@ -51,25 +56,41 @@ struct RangeFormData {
     range_5: i32,
 }
 
-async fn index(query: web::Query<HashMap<String, String>>) -> Result<HttpResponse> {
+async fn index(
+    query: web::Query<HashMap<String, String>>,
+    app_data: web::Data<AppData>,
+) -> Result<HttpResponse> {
     let s = if let Some(forecast_name) = query.get("forecast_name") {
-        ForecastTemplate { forecast_name }.render().unwrap()
+        let database = &app_data.database;
+        let forecast = match database.read_by_name(forecast_name.to_string()).await {
+            Some(forecast) => {
+                info!("Found forecast {}", forecast.id);
+                forecast
+            }
+            None => {
+                info!("Forecast does not exist -- creating {}", forecast_name);
+                let new_forecast = NewForecast {
+                    name: forecast_name.to_string(),
+                };
+                app_data.database.create(new_forecast).await.unwrap()
+            }
+        };
+        ForecastTemplate {
+            forecast_name: forecast.name.as_str(),
+        }
+        .render()
+        .unwrap()
     } else {
         Index.render().unwrap()
     };
     Ok(HttpResponse::Ok().content_type("text/html").body(s))
 }
 
-async fn list() -> Result<HttpResponse> {
-    let s = ListTemplate {
-        forecasts: &vec![
-            "forecast 1".to_string(),
-            "forecast 2".to_string(),
-            "forecast 3".to_string(),
-        ],
-    }
-    .render()
-    .unwrap();
+/// Get the list of forecasts
+async fn list(app_data: web::Data<AppData>) -> Result<HttpResponse> {
+    let results = app_data.database.find().await.unwrap();
+    let names: Vec<String> = results.iter().map(|f| f.name.clone()).collect();
+    let s = ListTemplate { forecasts: &names }.render().unwrap();
     Ok(HttpResponse::Ok().content_type("text/html").body(s))
 }
 
@@ -90,6 +111,7 @@ async fn adjust_range(form: web::Form<RangeFormData>, req: HttpRequest) -> Resul
         .to_str()
         .unwrap()
         .split('_');
+
     let operation = adjustment.nth(0).unwrap();
     let index_of_range_to_adjust = adjustment.next().unwrap().parse::<usize>().unwrap();
     // TODO: index ranges by 0-based index, not 1-based index
@@ -219,13 +241,23 @@ async fn generate_ranges(query: web::Query<HashMap<String, String>>) -> Result<H
     Ok(HttpResponse::Ok().content_type("text/html").body(s))
 }
 
+#[derive(Clone)]
+struct AppData {
+    pub database: Database,
+}
+
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     std::env::set_var("RUST_LOG", "info");
     env_logger::init();
 
+    let database = Database::new().await;
+    database.migrate().await.unwrap();
+    let app_data = AppData { database };
+
     HttpServer::new(move || {
         App::new()
+            .app_data(web::Data::new(app_data.clone()))
             .wrap(middleware::Logger::default())
             .service(web::resource("/").route(web::get().to(index)))
             .service(web::resource("/list").route(web::get().to(list)))

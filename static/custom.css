@@ -22,3 +22,12 @@
      width: 3em;
      margin-right: 1em;
  }
+
+ li.htmx-swapping {
+  opacity: 0;
+  transition: opacity 1s ease-out;
+}
+
+.list_forecast {
+  display: flex;
+}
