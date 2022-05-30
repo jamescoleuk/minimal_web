@@ -16,15 +16,11 @@
       <div class="grid">
         <aside>
           <h4>Existing forecasts</h4>
-          <div hx-get="/list" hx-trigger="load">
-            <ul>
-            </ul>
+          <div hx-get="/forecast/_list" hx-trigger="load">
+            <ul></ul>
           </div>
         </aside>
-        <section>
-            {% block content %}
-            {% endblock content %}
-        </section>
+        <section>{% block content %} {% endblock content %}</section>
       </div>
     </main>
   </body>

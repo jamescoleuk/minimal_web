@@ -1,0 +1,67 @@
+<form
+  hx-trigger="change consume"
+  hx-get="/forecast/_update_ranges"
+  id="range_form"
+>
+  <input type="hidden" name="start_date" value="{{ start_date }}" />
+  <input type="hidden" name="end_date" value="{{ end_date }}" />
+  {% for range in ranges %}
+  <div class="range_row">
+    <label for="range" class="range">
+      {{ range.label }} - {{ range.value }}%
+      <input
+        type="range"
+        min="0"
+        max="100"
+        value="{{ range.value }}"
+        name="range_{{ loop.index }}"
+      />
+    </label>
+    <span>
+      <button
+        type="button"
+        class="outline"
+        name="floor_{{ loop.index }}"
+        hx-trigger="click"
+        hx-post="/forecast/_adjust_range"
+        hx-target="#range_form"
+        {%
+        if
+        !range.can_floor
+        %}
+        disabled
+        {%
+        endif
+        %}
+      >
+        <img
+          src="static/icons/arrow-left.svg"
+          alt="Left arrow -- floor this value"
+        />
+      </button>
+      <button
+        type="button"
+        class="outline"
+        name="ceil_{{ loop.index }}"
+        hx-trigger="click"
+        hx-post="/forecast/_adjust_range"
+        hx-target="#range_form"
+        {%
+        if
+        !range.can_ceil
+        %}
+        disabled
+        {%
+        endif
+        %}
+      >
+        <img
+          src="static/icons/arrow-right.svg"
+          alt="Right arrow -- ceiling this value"
+        />
+      </button>
+    </span>
+  </div>
+  {% endfor %}
+  <p>Total: <span id="total">{{ total }}%</span></p>
+</form>
