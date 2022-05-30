@@ -21,9 +21,8 @@
       <button
         type="button"
         class="outline"
-        name="floor_{{ loop.index }}"
         hx-trigger="click"
-        hx-post="/forecast/_adjust_range"
+        hx-post="/forecast/_floor_range?range_index={{ loop.index }}"
         hx-target="#range_form"
         {%
         if
@@ -42,9 +41,8 @@
       <button
         type="button"
         class="outline"
-        name="ceil_{{ loop.index }}"
         hx-trigger="click"
-        hx-post="/forecast/_adjust_range"
+        hx-post="/forecast/_ceiling_range?range_index={{ loop.index }}"
         hx-target="#range_form"
         {%
         if
