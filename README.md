@@ -17,3 +17,15 @@ Dirs and files for UI have a 1-to-1 mapping. E.g.:
 
 Askama is great for detecting drift between the template and the code, but the templates aren't stored next to the code. This is a bit crap, because you've got to look in two places. Code that changes together should live together. I've looked at libraries that provide macros to build HTML, but that is a too insuffrably rubbish way of doing HTML. In the absence of JSX for Rust the best I can do is keep the directory structures aligned by convention.
 
+
+
+
+
+## Routes
+1. GET    / - redirect to /forecast
+2. GET    /forecast/ show a list of all forecasts
+3. GET    /forecast/create show the forecast creation page
+4. POST   /forecast/create - create the new forecast
+4. GET    /forecast/1 - show forecast with id=1. Render what's been set up so far.
+4. DELETE /forecast/1 - delete forecast with id=1
+4. POST   /forecast/1 - update forecast with id=1

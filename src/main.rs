@@ -3,9 +3,8 @@ use actix_web::{middleware, web, App, HttpResponse, HttpServer, Result};
 use askama::Template;
 use db::Database;
 use forecasts::ui::{
-    create_ranges::create,
     list::list,
-    range::{adjust_range, update_ranges},
+    range::{adjust_range, create, update_ranges},
 };
 use log::info;
 use std::collections::HashMap;
