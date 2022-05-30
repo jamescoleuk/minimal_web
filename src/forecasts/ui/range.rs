@@ -15,7 +15,7 @@ pub struct Range {
 }
 
 #[derive(Template)]
-#[template(path = "forecasts/_ranges.html")]
+#[template(path = "forecasts/_range.html")]
 struct RangesTemplate<'a> {
     ranges: &'a Vec<Range>,
     start_date: NaiveDate,

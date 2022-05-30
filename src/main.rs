@@ -2,7 +2,7 @@ use actix_files as fs;
 use actix_web::{middleware, web, App, HttpResponse, HttpServer, Result};
 use askama::Template;
 use db::Database;
-use forecasts::{
+use forecasts::ui::{
     list::list,
     range::{adjust_range, generate_ranges, update_ranges},
 };

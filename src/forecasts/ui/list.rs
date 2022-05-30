@@ -4,7 +4,7 @@ use askama::Template;
 use crate::AppData;
 
 #[derive(Template)]
-#[template(path = "forecasts/management/_list.html")]
+#[template(path = "forecasts/_list.html")]
 struct ListTemplate<'a> {
     forecasts: &'a Vec<String>,
 }
