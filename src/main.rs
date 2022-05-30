@@ -3,8 +3,9 @@ use actix_web::{middleware, web, App, HttpResponse, HttpServer, Result};
 use askama::Template;
 use db::Database;
 use forecasts::ui::{
+    create_ranges::create,
     list::list,
-    range::{adjust_range, generate_ranges, update_ranges},
+    range::{adjust_range, update_ranges},
 };
 use log::info;
 use std::collections::HashMap;
@@ -87,9 +88,7 @@ async fn main() -> std::io::Result<()> {
             // a fan of having to do this but I've not worked out an alternative yet.
             .service(web::resource("/").route(web::get().to(index)))
             .service(web::resource("/forecast/_list").route(web::get().to(list)))
-            .service(
-                web::resource("/forecast/_generate_ranges").route(web::get().to(generate_ranges)),
-            )
+            .service(web::resource("/forecast/_generate_ranges").route(web::get().to(create)))
             .service(web::resource("/forecast/_update_ranges").route(web::get().to(update_ranges)))
             .service(web::resource("/forecast/_adjust_range").route(web::post().to(adjust_range)))
             .service(fs::Files::new("/static", "./static").show_files_listing())
