@@ -1,22 +1,5 @@
 {% extends "base.html" %} {% block content %}
 <h3>Let's create your forecast</h3>
 <h4>{{ forecast_name }}</h4>
-<div>
-  <p>
-    This will be a date range forecast. It needs a start and end date. This will
-    be split into five ranges.
-  </p>
-  <form hx-get="/forecast/_generate_ranges" hx-target="#ranges">
-    <label for="date"
-      >Start date
-      <input required type="date" id="start_date" name="start_date" />
-    </label>
-    <label for="date"
-      >End date
-      <input required type="date" id="end_date" name="end_date" />
-    </label>
-    <button>Create ranges</button>
-  </form>
-  <div id="ranges"></div>
-</div>
+<div>{% include "_create_ranges.html" %}</div>
 {% endblock content %}
