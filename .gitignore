@@ -1,1 +1,3 @@
 /target
+forecaster.db*
+.DS_Store
