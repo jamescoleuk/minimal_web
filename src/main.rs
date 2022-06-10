@@ -3,6 +3,7 @@ use actix_web::{middleware, web, App, HttpResponse, HttpServer, Result};
 use askama::Template;
 use db::Database;
 use forecasts::ui::{
+    forecast::{create, edit, CreateForecastTemplate},
     list::list,
     range::{ceiling, floor, generate_ranges, update_ranges},
 };
@@ -14,45 +15,35 @@ use crate::db::NewForecast;
 mod db;
 mod forecasts;
 
-#[derive(Template)]
-#[template(path = "forecasts/forecast.html")]
-pub struct ForecastTemplate<'a> {
-    forecast_name: &'a str,
-}
-
-#[derive(Template)]
-#[template(path = "forecasts/index.html")]
-struct Index;
-
-async fn index(
-    query: web::Query<HashMap<String, String>>,
-    app_data: web::Data<AppData>,
-) -> Result<HttpResponse> {
-    let s = if let Some(forecast_name) = query.get("forecast_name") {
-        let database = &app_data.database;
-        let forecast = match database.read_by_name(forecast_name.to_string()).await {
-            Some(forecast) => {
-                info!("Found forecast {}", forecast.id);
-                forecast
-            }
-            None => {
-                info!("Forecast does not exist -- creating {}", forecast_name);
-                let new_forecast = NewForecast {
-                    name: forecast_name.to_string(),
-                };
-                app_data.database.create(new_forecast).await.unwrap()
-            }
-        };
-        ForecastTemplate {
-            forecast_name: forecast.name.as_str(),
-        }
-        .render()
-        .unwrap()
-    } else {
-        Index.render().unwrap()
-    };
-    Ok(HttpResponse::Ok().content_type("text/html").body(s))
-}
+// async fn index(
+//     query: web::Query<HashMap<String, String>>,
+//     app_data: web::Data<AppData>,
+// ) -> Result<HttpResponse> {
+//     let s = if let Some(forecast_name) = query.get("forecast_name") {
+//         let database = &app_data.database;
+//         let forecast = match database.read_by_name(forecast_name.to_string()).await {
+//             Some(forecast) => {
+//                 info!("Found forecast {}", forecast.id);
+//                 forecast
+//             }
+//             None => {
+//                 info!("Forecast does not exist -- creating {}", forecast_name);
+//                 let new_forecast = NewForecast {
+//                     name: forecast_name.to_string(),
+//                 };
+//                 app_data.database.create(new_forecast).await.unwrap()
+//             }
+//         };
+//         ForecastTemplate {
+//             forecast_name: forecast.name.as_str(),
+//         }
+//         .render()
+//         .unwrap()
+//     } else {
+//         CreateForecastTemplate.render().unwrap()
+//     };
+//     Ok(HttpResponse::Ok().content_type("text/html").body(s))
+// }
 #[derive(Clone)]
 pub struct AppData {
     pub database: Database,
@@ -60,7 +51,8 @@ pub struct AppData {
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    std::env::set_var("RUST_LOG", "info");
+    std::env::set_var("RUST_LOG", "info,sqlx=error,actix=error");
+    // std::env::set_var("LOG_LEVEL", "info");
     env_logger::init();
 
     let database = Database::new().await;
@@ -85,8 +77,12 @@ async fn main() -> std::io::Result<()> {
             //   /forecasts/_list
             // There's got to be a lot of dicipline to keep this naming straight. I'm not
             // a fan of having to do this but I've not worked out an alternative yet.
-            .service(web::resource("/").route(web::get().to(index)))
-            .service(web::resource("/forecast/_list").route(web::get().to(list)))
+            // .service(web::resource("/").route(web::get().to(index)))
+            // .service(web::resource("/forecast").route(web::get().to(forecast_list)))
+            .service(web::resource("/forecast/create").route(web::get().to(create)))
+            .service(web::resource("/forecast/{id}").route(web::get().to(edit)))
+            // Partials
+            .service(web::resource("/forecast/_list").route(web::get().to(list))) // TODO: Call this mini-list
             .service(
                 web::resource("/forecast/_generate_ranges").route(web::get().to(generate_ranges)),
             )

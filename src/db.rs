@@ -1,14 +1,22 @@
-use std::env;
+use std::{env, str::FromStr};
 
 use sqlx::SqlitePool;
+use strum_macros::{Display, EnumString};
 
 pub struct NewForecast {
     pub name: String,
+    pub forecast_type: ForecastType,
+}
+
+#[derive(Debug, PartialEq, EnumString, Display)]
+pub enum ForecastType {
+    Date,
 }
 
 pub struct SavedForecast {
     pub id: i64,
     pub name: String,
+    pub forecast_type: ForecastType,
 }
 
 impl SavedForecast {
@@ -17,6 +25,7 @@ impl SavedForecast {
         SavedForecast {
             id,
             name: new_forecast.name.clone(),
+            forecast_type: new_forecast.forecast_type,
         }
     }
 }
@@ -44,8 +53,8 @@ impl Database {
     pub async fn find(&self) -> anyhow::Result<(Vec<SavedForecast>)> {
         let recs = sqlx::query!(
             r#"
-SELECT id, name
-FROM forecasts
+SELECT id, name, forecastType
+FROM forecast
 ORDER BY id
         "#
         )
@@ -56,18 +65,22 @@ ORDER BY id
             forecasts.push(SavedForecast {
                 id: rec.id,
                 name: rec.name,
+                forecast_type: ForecastType::from_str(&rec.forecastType)
+                    .expect("Invalid forecast type"),
             })
         }
         Ok(forecasts)
     }
 
     pub async fn create(&self, forecast: NewForecast) -> anyhow::Result<SavedForecast> {
+        let forecast_type = forecast.forecast_type.to_string();
         let id = sqlx::query!(
             r#"
-INSERT INTO forecasts (name)
-VALUES (?1);
+INSERT INTO forecast (name, forecastType)
+VALUES (?1, ?2);
         "#,
-            forecast.name
+            forecast.name,
+            forecast_type
         )
         .execute(&self.pool)
         .await?
@@ -78,8 +91,8 @@ VALUES (?1);
     pub async fn read_by_name(&self, name: String) -> Option<SavedForecast> {
         let rec = sqlx::query!(
             r#"
-SELECT id, name 
-FROM forecasts
+SELECT id, name, forecastType
+FROM forecast
 WHERE name = ?1
         "#,
             name
@@ -91,6 +104,8 @@ WHERE name = ?1
             Ok(rec) => Some(SavedForecast {
                 id: rec.id,
                 name: rec.name,
+                forecast_type: ForecastType::from_str(&rec.forecastType)
+                    .expect("Invalid forecast type"),
             }),
             Err(e) => match e {
                 sqlx::Error::RowNotFound => None,
@@ -102,8 +117,8 @@ WHERE name = ?1
     pub async fn read_by_id(&self, id: i64) -> Option<SavedForecast> {
         let rec = sqlx::query!(
             r#"
-SELECT id, name 
-FROM forecasts
+SELECT id, name, forecastType
+FROM forecast
 WHERE id = ?1
         "#,
             id
@@ -115,6 +130,8 @@ WHERE id = ?1
             Ok(rec) => Some(SavedForecast {
                 id: rec.id,
                 name: rec.name,
+                forecast_type: ForecastType::from_str(&rec.forecastType)
+                    .expect("Invalid forecast type"),
             }),
             Err(e) => match e {
                 sqlx::Error::RowNotFound => None,
@@ -126,7 +143,7 @@ WHERE id = ?1
     pub async fn update(&self, forecast: SavedForecast) -> anyhow::Result<()> {
         let rec = sqlx::query!(
             r#"
-UPDATE forecasts
+UPDATE forecast
 SET name = ?1
 WHERE id = ?2;
         "#,
@@ -150,7 +167,7 @@ WHERE id = ?2;
     pub async fn delete(&self, id: i64) -> anyhow::Result<()> {
         let rec = sqlx::query!(
             r#"
-DELETE FROM forecasts 
+DELETE FROM forecast
 WHERE id = ?1;
         "#,
             id

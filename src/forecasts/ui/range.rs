@@ -178,7 +178,7 @@ pub async fn generate_ranges(query: web::Query<HashMap<String, String>>) -> Resu
     Ok(HttpResponse::Ok().content_type("text/html").body(s))
 }
 
-pub fn get_ranges(start_date: NaiveDate, end_date: NaiveDate, range_values: &[i32]) -> Vec<Range> {
+fn get_ranges(start_date: NaiveDate, end_date: NaiveDate, range_values: &[i32]) -> Vec<Range> {
     let days_in_range = end_date.signed_duration_since(start_date).num_days();
     let number_of_ranges = 5;
     let range_size = days_in_range / number_of_ranges;
