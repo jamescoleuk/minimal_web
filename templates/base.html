@@ -2,10 +2,19 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <script src="static/htmx.min.js" defer></script>
-    <script src="static/feather.min.js"></script>
-    <link rel="stylesheet" href="static/pico.min.css" />
-    <link rel="stylesheet" href="static/custom.css" />
+    <script src="/static/htmx.min.js" defer></script>
+    <script src="/static/feather.min.js"></script>
+
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/water.css@2/out/water.css"
+    />
+
+    {#
+    <link rel="stylesheet" href="/static/pico.min.css" />
+    #}
+
+    <link rel="stylesheet" href="/static/custom.css" />
     <title>Forecaster</title>
   </head>
   <body>
@@ -13,15 +22,7 @@
       <header>
         <h1>Forecaster</h1>
       </header>
-      <div class="grid">
-        <aside>
-          <h4>Existing forecasts</h4>
-          <div hx-get="/forecast/_list" hx-trigger="load">
-            <ul></ul>
-          </div>
-        </aside>
-        <section>{% block content %} {% endblock content %}</section>
-      </div>
+      <section>{% block content %} {% endblock content %}</section>
     </main>
   </body>
 </html>

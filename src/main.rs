@@ -44,6 +44,16 @@ mod forecasts;
 //     };
 //     Ok(HttpResponse::Ok().content_type("text/html").body(s))
 // }
+
+async fn index(
+    query: web::Query<HashMap<String, String>>,
+    app_data: web::Data<AppData>,
+) -> Result<HttpResponse> {
+    Ok(HttpResponse::TemporaryRedirect()
+        .header("location", "/forecast/create")
+        .finish())
+}
+
 #[derive(Clone)]
 pub struct AppData {
     pub database: Database,
@@ -53,6 +63,8 @@ pub struct AppData {
 async fn main() -> std::io::Result<()> {
     std::env::set_var("RUST_LOG", "info,sqlx=error,actix=error");
     // std::env::set_var("LOG_LEVEL", "info");
+    info!("Starting up");
+    print!("Starting up print");
     env_logger::init();
 
     let database = Database::new().await;
@@ -79,8 +91,13 @@ async fn main() -> std::io::Result<()> {
             // a fan of having to do this but I've not worked out an alternative yet.
             // .service(web::resource("/").route(web::get().to(index)))
             // .service(web::resource("/forecast").route(web::get().to(forecast_list)))
+            .service(web::resource("/").route(web::get().to(index)))
             .service(web::resource("/forecast/create").route(web::get().to(create)))
             .service(web::resource("/forecast/{id}").route(web::get().to(edit)))
+            .service(
+                web::resource("/forecast/{id}/_generate_ranges")
+                    .route(web::get().to(generate_ranges)),
+            )
             // Partials
             .service(web::resource("/forecast/_list").route(web::get().to(list))) // TODO: Call this mini-list
             .service(

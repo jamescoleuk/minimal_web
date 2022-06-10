@@ -1,6 +1,5 @@
-use actix_web::{http::header::Header, web, HttpRequest, HttpResponse, Result};
+use actix_web::{web, HttpResponse, Result};
 use askama::Template;
-use chrono::{Duration, NaiveDate};
 use log::info;
 use serde::Deserialize;
 use std::collections::HashMap;
@@ -14,6 +13,7 @@ use crate::{
 #[template(path = "forecasts/forecast.html")]
 pub struct ForecastTemplate<'a> {
     forecast_name: &'a str,
+    forecast_id: &'a str,
 }
 
 #[derive(Template)]
@@ -74,6 +74,7 @@ pub async fn edit(
             info!("Found forecast {}", forecast.id);
             let body = ForecastTemplate {
                 forecast_name: forecast.name.as_str(),
+                forecast_id: forecast.id.to_string().as_str(),
             }
             .render()
             .unwrap();

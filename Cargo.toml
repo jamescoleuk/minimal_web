@@ -13,6 +13,8 @@ env_logger = "0.9.0"
 log = "0.4.17"
 serde = {version = "1.0", features = ["derive"]}
 sqlx = {version = "0.5.13", features = ["runtime-actix-native-tls", "sqlite", "migrate"]}
+strum = "0.24"
+strum_macros = "0.24"
 
 [build-dependencies]
 askama = "0.11.0"

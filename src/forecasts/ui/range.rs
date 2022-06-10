@@ -175,6 +175,7 @@ pub async fn generate_ranges(query: web::Query<HashMap<String, String>>) -> Resu
     }
     .render()
     .unwrap();
+    // TODO: save ranges
     Ok(HttpResponse::Ok().content_type("text/html").body(s))
 }
 
