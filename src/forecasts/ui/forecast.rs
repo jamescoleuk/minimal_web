@@ -17,6 +17,15 @@ pub struct ForecastTemplate<'a> {
 }
 
 #[derive(Template)]
+#[template(path = "forecasts/saved_forecast.html")]
+pub struct SavedForecastTemplate<'a> {
+    forecast_name: &'a str,
+    forecast_id: &'a str,
+    start_date: &'a str,
+    end_date: &'a str,
+}
+
+#[derive(Template)]
 #[template(path = "forecasts/create.html")]
 pub struct CreateForecastTemplate;
 
@@ -57,7 +66,7 @@ pub async fn create(
 
 #[derive(Deserialize)]
 pub struct EditPath {
-    id: i64,
+    pub id: i64,
 }
 
 pub async fn edit(
@@ -65,20 +74,49 @@ pub async fn edit(
     // query: web::Query<HashMap<String, String>>,
     app_data: web::Data<AppData>,
 ) -> Result<HttpResponse> {
-    info!("Editing forecast with id {}", path.id);
+    println!("Editing forecast with id {}", path.id);
     let database = &app_data.database;
     match database.read_by_id(path.id).await {
         Some(forecast) => {
+            if forecast.data.is_none() {
+                println!("Found forecast {}", forecast.id);
+                let body = ForecastTemplate {
+                    forecast_name: forecast.name.as_str(),
+                    forecast_id: forecast.id.to_string().as_str(),
+                }
+                .render()
+                .unwrap();
+                Ok(HttpResponse::Ok().content_type("text/html").body(body))
+            } else {
+                println!("Found saved forecast {}", forecast.id);
+                let body = SavedForecastTemplate {
+                    forecast_name: forecast.name.as_str(),
+                    forecast_id: forecast.id.to_string().as_str(),
+                    start_date: forecast
+                        .data
+                        .as_ref()
+                        .unwrap()
+                        .start_date
+                        .as_ref()
+                        .unwrap()
+                        .to_string()
+                        .as_str(),
+                    end_date: forecast
+                        .data
+                        .as_ref()
+                        .unwrap()
+                        .end_date
+                        .as_ref()
+                        .unwrap()
+                        .to_string()
+                        .as_str(),
+                }
+                .render()
+                .unwrap();
+                Ok(HttpResponse::Ok().content_type("text/html").body(body))
+            }
             // TODO: if there's no date then ask for a date
             // TODO: if there's a date then show ranges
-            info!("Found forecast {}", forecast.id);
-            let body = ForecastTemplate {
-                forecast_name: forecast.name.as_str(),
-                forecast_id: forecast.id.to_string().as_str(),
-            }
-            .render()
-            .unwrap();
-            Ok(HttpResponse::Ok().content_type("text/html").body(body))
         }
         None => Ok(HttpResponse::NotFound().finish()),
     }

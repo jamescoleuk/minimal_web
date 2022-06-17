@@ -1,0 +1,8 @@
+{% extends "base.html" %} {% block content %}
+<h4>Your forecasts</h4>
+<ul>
+  {% for forecast in forecasts %}
+  <li><a href="/forecast/{{ forecast.id }}">{{ forecast.name }}</a></li>
+  {% endfor %}
+</ul>
+{% endblock content %}

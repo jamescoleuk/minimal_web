@@ -1,7 +1,11 @@
 use std::{env, str::FromStr};
 
+use log::info;
+use serde::{Deserialize, Serialize};
 use sqlx::SqlitePool;
 use strum_macros::{Display, EnumString};
+
+use crate::forecasts::ui::range::Range;
 
 pub struct NewForecast {
     pub name: String,
@@ -17,6 +21,14 @@ pub struct SavedForecast {
     pub id: i64,
     pub name: String,
     pub forecast_type: ForecastType,
+    pub data: Option<RangeForecast>,
+}
+
+#[derive(Serialize, Deserialize, Debug, PartialEq)]
+pub struct RangeForecast {
+    pub start_date: Option<String>,
+    pub end_date: Option<String>,
+    pub ranges: Option<Vec<Range>>,
 }
 
 impl SavedForecast {
@@ -26,6 +38,7 @@ impl SavedForecast {
             id,
             name: new_forecast.name.clone(),
             forecast_type: new_forecast.forecast_type,
+            data: None,
         }
     }
 }
@@ -67,6 +80,7 @@ ORDER BY id
                 name: rec.name,
                 forecast_type: ForecastType::from_str(&rec.forecastType)
                     .expect("Invalid forecast type"),
+                data: None,
             })
         }
         Ok(forecasts)
@@ -106,6 +120,7 @@ WHERE name = ?1
                 name: rec.name,
                 forecast_type: ForecastType::from_str(&rec.forecastType)
                     .expect("Invalid forecast type"),
+                data: None,
             }),
             Err(e) => match e {
                 sqlx::Error::RowNotFound => None,
@@ -132,9 +147,36 @@ WHERE id = ?1
                 name: rec.name,
                 forecast_type: ForecastType::from_str(&rec.forecastType)
                     .expect("Invalid forecast type"),
+                data: None,
             }),
             Err(e) => match e {
                 sqlx::Error::RowNotFound => None,
+                _ => panic!("bad {}", e),
+            },
+        }
+    }
+
+    pub async fn update_data(&self, id: i64, data: RangeForecast) -> anyhow::Result<()> {
+        let data_json = serde_json::to_string(&data)?;
+        let rec = sqlx::query!(
+            r#"
+UPDATE forecast
+SET data = ?1
+WHERE id =?2 
+        "#,
+            data_json,
+            id
+        )
+        .execute(&self.pool)
+        .await;
+
+        match rec {
+            Ok(_) => Ok(()),
+            Err(e) => match e {
+                sqlx::Error::RowNotFound => Err(anyhow::anyhow!(
+                    "Updating data but found no forecast with id {}",
+                    id
+                )),
                 _ => panic!("{}", e),
             },
         }

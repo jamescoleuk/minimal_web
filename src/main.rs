@@ -5,12 +5,12 @@ use db::Database;
 use forecasts::ui::{
     forecast::{create, edit, CreateForecastTemplate},
     list::list,
-    range::{ceiling, floor, generate_ranges, update_ranges},
+    range::{ceiling, floor, update_ranges},
 };
 use log::info;
 use std::collections::HashMap;
 
-use crate::db::NewForecast;
+use crate::{db::NewForecast, forecasts::routes::generate_ranges};
 
 mod db;
 mod forecasts;
@@ -50,7 +50,7 @@ async fn index(
     app_data: web::Data<AppData>,
 ) -> Result<HttpResponse> {
     Ok(HttpResponse::TemporaryRedirect()
-        .header("location", "/forecast/create")
+        .append_header(("location", "/forecast/list"))
         .finish())
 }
 
@@ -61,10 +61,10 @@ pub struct AppData {
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    std::env::set_var("RUST_LOG", "info,sqlx=error,actix=error");
-    // std::env::set_var("LOG_LEVEL", "info");
+    // std::env::set_var("RUST_LOG", "info,sqlx=error,actix=error");
+    std::env::set_var("LOG_LEVEL", "info");
     info!("Starting up");
-    print!("Starting up print");
+    println!("Starting up print");
     env_logger::init();
 
     let database = Database::new().await;
@@ -89,17 +89,14 @@ async fn main() -> std::io::Result<()> {
             //   /forecasts/_list
             // There's got to be a lot of dicipline to keep this naming straight. I'm not
             // a fan of having to do this but I've not worked out an alternative yet.
-            // .service(web::resource("/").route(web::get().to(index)))
-            // .service(web::resource("/forecast").route(web::get().to(forecast_list)))
             .service(web::resource("/").route(web::get().to(index)))
             .service(web::resource("/forecast/create").route(web::get().to(create)))
+            .service(web::resource("/forecast/list").route(web::get().to(list))) // TODO: Call this mini-list
             .service(web::resource("/forecast/{id}").route(web::get().to(edit)))
             .service(
                 web::resource("/forecast/{id}/_generate_ranges")
                     .route(web::get().to(generate_ranges)),
             )
-            // Partials
-            .service(web::resource("/forecast/_list").route(web::get().to(list))) // TODO: Call this mini-list
             .service(
                 web::resource("/forecast/_generate_ranges").route(web::get().to(generate_ranges)),
             )

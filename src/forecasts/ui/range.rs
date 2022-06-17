@@ -1,10 +1,19 @@
 use actix_web::{web, HttpRequest, HttpResponse, Result};
+use anyhow::bail;
 use askama::Template;
 use chrono::{Duration, NaiveDate};
 use log::info;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
+use crate::{
+    db::{Database, RangeForecast},
+    AppData,
+};
+
+use super::forecast::EditPath;
+
+#[derive(Serialize, Deserialize, Debug, PartialEq)]
 pub struct Range {
     pub(crate) start: NaiveDate,
     pub(crate) end: NaiveDate,
@@ -160,23 +169,19 @@ pub async fn update_ranges(query: web::Query<HashMap<String, String>>) -> Result
 }
 
 // Creates the initial set of ranges.
-pub async fn generate_ranges(query: web::Query<HashMap<String, String>>) -> Result<HttpResponse> {
-    let start_date_str = query.get("start_date").unwrap();
-    let end_date_str = query.get("end_date").unwrap();
-
-    let start_date = NaiveDate::parse_from_str(start_date_str, "%Y-%m-%d").unwrap();
-    let end_date = NaiveDate::parse_from_str(end_date_str, "%Y-%m-%d").unwrap();
-
-    let s = RangesTemplate {
-        ranges: &get_ranges(start_date, end_date, &[20, 20, 20, 20, 20]),
-        start_date,
-        end_date,
-        total: &100,
-    }
-    .render()
-    .unwrap();
-    // TODO: save ranges
-    Ok(HttpResponse::Ok().content_type("text/html").body(s))
+pub async fn create_ranges(
+    database: &Database,
+    id: i64,
+    start_date: NaiveDate,
+    end_date: NaiveDate,
+) -> anyhow::Result<()> {
+    let range_forecast = RangeForecast {
+        start_date: Some(start_date.to_string()),
+        end_date: Some(end_date.to_string()),
+        ranges: Some(get_ranges(start_date, end_date, &[20, 20, 20, 20, 20])),
+    };
+    database.update_data(id, range_forecast).await?;
+    Ok(())
 }
 
 fn get_ranges(start_date: NaiveDate, end_date: NaiveDate, range_values: &[i32]) -> Vec<Range> {
