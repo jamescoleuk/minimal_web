@@ -1,4 +1,5 @@
-{% extends "base.html" %} {% block content %}
+{% extends "base.html" %} {% block content %} {% set has_ranges_generated =
+start_date != "" %}
 <h4>Forecast name: {{ forecast_name }}</h4>
 <p>
   This will be a date range forecast. It needs a start and end date. This will
@@ -28,7 +29,14 @@
         value="{{ end_date }}"
       />
     </label>
+    {% if has_ranges_generated %}
+    <button>Replace ranges</button>
+
+    <div>{% include "_range.html" %}</div>
+
+    {% else %}
     <button>Create ranges</button>
+    {% endif %}
   </form>
 
   {#

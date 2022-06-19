@@ -9,6 +9,8 @@ use crate::{
     AppData,
 };
 
+use super::range::Range;
+
 #[derive(Template)]
 #[template(path = "forecasts/forecast.html")]
 pub struct ForecastTemplate<'a> {
@@ -23,6 +25,8 @@ pub struct SavedForecastTemplate<'a> {
     forecast_id: &'a str,
     start_date: &'a str,
     end_date: &'a str,
+    ranges: &'a Vec<Range>,
+    total: &'a i32,
 }
 
 #[derive(Template)]
@@ -91,6 +95,7 @@ pub async fn edit(
                 Ok(HttpResponse::Ok().content_type("text/html").body(body))
             } else {
                 println!("Found saved forecast {}", forecast.id);
+                let ranges = forecast.data.as_ref().unwrap().ranges.as_ref().unwrap();
                 let body = SavedForecastTemplate {
                     forecast_name: forecast.name.as_str(),
                     forecast_id: forecast.id.to_string().as_str(),
@@ -112,6 +117,8 @@ pub async fn edit(
                         .unwrap()
                         .to_string()
                         .as_str(),
+                    ranges,
+                    total: &ranges.iter().map(|x| x.value).sum(),
                 }
                 .render()
                 .unwrap();
