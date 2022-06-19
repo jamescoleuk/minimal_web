@@ -1,6 +1,5 @@
 use actix_web::{web, HttpResponse, Result};
 use askama::Template;
-use log::info;
 
 use crate::{db::SavedForecast, AppData};
 

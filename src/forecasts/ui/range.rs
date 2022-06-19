@@ -1,17 +1,11 @@
-use actix_web::{web, HttpRequest, HttpResponse, Result};
-use anyhow::bail;
+use actix_web::{web, HttpResponse, Result};
 use askama::Template;
 use chrono::{Duration, NaiveDate};
 use log::info;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
-use crate::{
-    db::{Database, RangeForecast},
-    AppData,
-};
-
-use super::forecast::EditPath;
+use crate::db::{Database, RangeForecast};
 
 #[derive(Serialize, Deserialize, Debug, PartialEq)]
 pub struct Range {

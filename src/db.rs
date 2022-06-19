@@ -1,6 +1,5 @@
 use std::{env, str::FromStr};
 
-use log::info;
 use serde::{Deserialize, Serialize};
 use sqlx::types::Json;
 use sqlx::SqlitePool;
@@ -86,7 +85,7 @@ impl Database {
         Ok(())
     }
 
-    pub async fn find(&self) -> anyhow::Result<(Vec<SavedForecast>)> {
+    pub async fn find(&self) -> anyhow::Result<Vec<SavedForecast>> {
         let recs = sqlx::query!(
             r#"
 SELECT id, name, forecastType

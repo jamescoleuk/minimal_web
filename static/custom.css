@@ -21,6 +21,7 @@
      height: 3em;
      width: 3em;
      margin-right: 1em;
+     padding:0;
  }
 
  li.htmx-swapping {

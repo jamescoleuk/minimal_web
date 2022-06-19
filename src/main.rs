@@ -1,16 +1,14 @@
 use actix_files as fs;
 use actix_web::{middleware, web, App, HttpResponse, HttpServer, Result};
-use askama::Template;
 use db::Database;
 use forecasts::ui::{
-    forecast::{create, edit, CreateForecastTemplate},
+    forecast::{create, edit},
     list::list,
     range::{ceiling, floor, update_ranges},
 };
 use log::info;
-use std::collections::HashMap;
 
-use crate::{db::NewForecast, forecasts::routes::generate_ranges};
+use crate::forecasts::routes::generate_ranges;
 
 mod db;
 mod forecasts;
@@ -45,9 +43,8 @@ mod forecasts;
 //     Ok(HttpResponse::Ok().content_type("text/html").body(s))
 // }
 
-async fn index(
-    query: web::Query<HashMap<String, String>>,
-    app_data: web::Data<AppData>,
+async fn index(// query: web::Query<HashMap<String, String>>,
+    // app_data: web::Data<AppData>,
 ) -> Result<HttpResponse> {
     Ok(HttpResponse::TemporaryRedirect()
         .append_header(("location", "/forecast/list"))
