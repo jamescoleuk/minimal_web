@@ -76,7 +76,9 @@ pub async fn edit(
 ) -> Result<HttpResponse> {
     println!("Editing forecast with id {}", path.id);
     let database = &app_data.database;
-    match database.read_by_id(path.id).await {
+    let maybe_forecast = database.read_by_id(path.id).await;
+    print!("{:#?}", maybe_forecast);
+    match maybe_forecast {
         Some(forecast) => {
             if forecast.data.is_none() {
                 println!("Found forecast {}", forecast.id);

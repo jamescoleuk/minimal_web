@@ -23,6 +23,16 @@ pub struct Range {
     pub(crate) can_floor: bool,
 }
 
+impl std::fmt::Display for Range {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(f, "start_date: {}", self.start)?;
+        write!(f, "end_date: {}", self.end)?;
+        write!(f, "label: {}", self.label)?;
+        write!(f, "value: {}", self.value)?;
+        Ok(())
+    }
+}
+
 #[derive(Template)]
 #[template(path = "forecasts/_range.html")]
 pub struct RangesTemplate<'a> {

@@ -2,6 +2,7 @@ use std::{env, str::FromStr};
 
 use log::info;
 use serde::{Deserialize, Serialize};
+use sqlx::types::Json;
 use sqlx::SqlitePool;
 use strum_macros::{Display, EnumString};
 
@@ -12,11 +13,12 @@ pub struct NewForecast {
     pub forecast_type: ForecastType,
 }
 
-#[derive(Debug, PartialEq, EnumString, Display)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, EnumString, Display)]
 pub enum ForecastType {
     Date,
 }
 
+#[derive(Serialize, Deserialize, Debug, PartialEq)]
 pub struct SavedForecast {
     pub id: i64,
     pub name: String,
@@ -29,6 +31,27 @@ pub struct RangeForecast {
     pub start_date: Option<String>,
     pub end_date: Option<String>,
     pub ranges: Option<Vec<Range>>,
+}
+
+impl std::fmt::Display for RangeForecast {
+    // This trait requires `fmt` with this exact signature.
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        if self.start_date.is_some() {
+            write!(f, "{}", self.start_date.as_ref().unwrap())?;
+        }
+        if self.end_date.is_some() {
+            write!(f, "{}", self.end_date.as_ref().unwrap())?;
+        }
+        if self.ranges.is_some() {
+            for range in self.ranges.as_ref().unwrap() {
+                write!(f, "{:#}", range)?;
+            }
+        }
+
+        // Use 'inspect' when this feature is no longer unstable
+        // self.end_date.inspect(|ed| write!(f, "{}", ed));
+        Ok(())
+    }
 }
 
 impl SavedForecast {
@@ -132,7 +155,11 @@ WHERE name = ?1
     pub async fn read_by_id(&self, id: i64) -> Option<SavedForecast> {
         let rec = sqlx::query!(
             r#"
-SELECT id, name, forecastType
+SELECT 
+    id, 
+    name, 
+    forecastType, 
+    data AS "data: Json<RangeForecast>"
 FROM forecast
 WHERE id = ?1
         "#,
@@ -142,13 +169,20 @@ WHERE id = ?1
         .await;
 
         match rec {
-            Ok(rec) => Some(SavedForecast {
-                id: rec.id,
-                name: rec.name,
-                forecast_type: ForecastType::from_str(&rec.forecastType)
-                    .expect("Invalid forecast type"),
-                data: None,
-            }),
+            Ok(rec) => {
+                let data = if let Some(json) = rec.data {
+                    Some(json.0)
+                } else {
+                    None
+                };
+                Some(SavedForecast {
+                    id: rec.id,
+                    name: rec.name,
+                    forecast_type: ForecastType::from_str(&rec.forecastType)
+                        .expect("Invalid forecast type"),
+                    data,
+                })
+            }
             Err(e) => match e {
                 sqlx::Error::RowNotFound => None,
                 _ => panic!("bad {}", e),

@@ -10,10 +10,16 @@
   <form action="/forecast/{{ forecast_id }}/_generate_ranges">
     <label for="date"
       >Start date
-      <input required type="date" id="start_date" name="start_date" />
+      <input
+        required
+        type="date"
+        id="start_date"
+        name="start_date"
+        value="{{ start_date }}"
+      />
     </label>
     <label for="date"
-      >End date buts
+      >End date
       <input
         required
         type="date"
