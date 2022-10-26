@@ -1,3 +1,5 @@
+use std::{env, str::FromStr};
+
 use actix_files as fs;
 use actix_web::{middleware, web, App, HttpResponse, HttpServer, Result};
 use db::Database;
@@ -58,11 +60,15 @@ pub struct AppData {
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    // std::env::set_var("RUST_LOG", "info,sqlx=error,actix=error");
-    std::env::set_var("LOG_LEVEL", "info");
-    info!("Starting up");
-    println!("Starting up print");
-    env_logger::init();
+    let logging_level = env::var("LOGGING_LEVEL").expect("LOGGING_LEVEL must be set");
+    let level = log::Level::from_str(&logging_level)
+        .expect(format!("LOGGING_LEVEL must be parseable, but was {}", logging_level).as_str())
+        .to_level_filter();
+    env_logger::Builder::from_default_env()
+        .format_timestamp_secs()
+        .filter(None, level)
+        .init();
+    info!("Starting up...");
 
     let database = Database::new().await;
     database.migrate().await.unwrap();

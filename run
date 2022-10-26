@@ -27,9 +27,6 @@ db_drop() {
 }
 
 run() {
+    export LOGGING_LEVEL=debug
     cargo watch -x 'run'
-}
-
-code() {
-    code .
 }
