@@ -10,11 +10,17 @@
     <label for="range" class="range">
       {{ range.label }} - {{ range.value }}%
       <input
+        id="range_{{
+          loop.index }}"
         type="range"
         min="0"
         max="100"
         value="{{ range.value }}"
-        name="range_{{ loop.index }}"
+        name="range_{{
+      loop.index }}"
+        hx-trigger="change"
+        hx-get="/forecast/_update_ranges"
+        hx-target="closest form"
       />
     </label>
     <span>
